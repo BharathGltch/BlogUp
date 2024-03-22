@@ -8,15 +8,20 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const Secret = "My-Secret";
 function authMiddleware(req, res, next) {
     var _a;
-    const token = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.token;
-    if (token == null) {
+    const token = (_a = req.get("token")) === null || _a === void 0 ? void 0 : _a.split(",")[1];
+    if (token == undefined) {
         res.status(404).json({ status: false });
+        return;
     }
     jsonwebtoken_1.default.verify(token, Secret, {}, (err, data) => {
         if (err) {
             res.status(404).json({ message: "Invalid token" });
         }
-        res.status(200).json({ username: data });
+        if (data == undefined) {
+            res.status(404).json({ message: "Invalid token" });
+            return;
+        }
+        req.username = data;
     });
     next();
 }

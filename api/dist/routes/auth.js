@@ -19,11 +19,14 @@ const auth_1 = __importDefault(require("../db/auth"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const initConn_1 = require("../db/initConn");
 const cors_1 = __importDefault(require("cors"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 const Secret = "My-Secret";
 router.use(body_parser_1.default.urlencoded({ extended: false }));
 router.use((0, cors_1.default)());
 router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Inside the signup route");
+    console.log("the body is " + req.body);
     let resultParse = blogcommon_1.signupInput.safeParse(req.body);
     if (!resultParse.success) {
         res.status(422).json({ message: "error" });
@@ -35,15 +38,15 @@ router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function*
         yield initConn_1.db.none(query, [username, password]);
         initConn_1.pgp.end();
         let token = jsonwebtoken_1.default.sign({ username: username }, Secret, { expiresIn: "1h" });
-        res.cookie("token", token, {
-            httpOnly: false,
-        });
         res.status(201).json({
+            status: true,
+            token: token,
             message: "Signup Successful",
         });
     }
     catch (ex) {
         res.status(404).json({
+            status: false,
             message: "Something went wrong",
         });
     }
@@ -53,7 +56,7 @@ router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function*
     console.log("body is" + JSON.stringify(req.body));
     console.log(resultParse);
     if (!resultParse.success) {
-        res.status(404).json({ message: "Input Type Invalid" });
+        res.status(400).json({ status: false, message: "Input Type Invalid" });
         return;
     }
     else {
@@ -68,7 +71,12 @@ router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function*
             expiresIn: "1h",
         });
         res.cookie("token", token, { httpOnly: true });
-        res.status(201).json({ status: true, message: "Login Successful" });
+        res
+            .status(201)
+            .json({ status: true, token: token, message: "Login Successful" });
     }
 }));
+router.get("/me", authMiddleware_1.authMiddleware, (req, res) => {
+    res.status(200).json({ username: req.username });
+});
 exports.default = router;

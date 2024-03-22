@@ -7,14 +7,22 @@ import authRoutes from "./routes/auth";
 import bodyParser from "body-parser";
 
 const Secret = "My-Secret";
+
+const corsOptions = {
+  credentials: true,
+  origin: "*", // Whitelist the domains you want to allow
+};
+
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 const port = 3000;
 
-app.post("/test", (req, res) => {
+app.get("/test", (req, res) => {
+  console.log("The cookies are" + req.cookies);
+  console.log(req.body);
   return res.status(200).json({ message: "Hello" });
 });
 app.use("/auth", authRoutes);
