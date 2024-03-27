@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import express from "express";
 import { signupInput } from "@bharath_ch/blogcommon";
 import pgPromise from "pg-promise";
-import authenticateUser from "../db/auth";
+import { authenticateUser, authenticateUserPrisma } from "../db/auth";
 import bodyParser from "body-parser";
 import { pgp, db } from "../db/initConn";
 import cors from "cors";
@@ -51,15 +51,19 @@ router.post("/signin", async (req, res) => {
     return;
   } else {
     const { username, password } = resultParse.data;
-    let user = await authenticateUser(username, password);
+    let user = await authenticateUserPrisma(username, password);
     if (user == null) {
       return res
         .status(404)
         .json({ status: false, message: "Username or password incorrect" });
     }
-    let token = jwt.sign({ username: user.username }, Secret, {
-      expiresIn: "1h",
-    });
+    let token = jwt.sign(
+      { userid: user.userid, username: user.username },
+      Secret,
+      {
+        expiresIn: "1h",
+      }
+    );
     res.cookie("token", token, { httpOnly: true });
     res
       .status(201)

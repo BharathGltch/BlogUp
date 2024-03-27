@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model blogs {
+  blogid Int      @id @default(autoincrement())
+  userid Int?
+  date   DateTime @default(now()) @db.Date
+  users  users?   @relation(fields: [userid], references: [userid], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  userid   Int     @id @default(autoincrement())
+  username String? @db.VarChar(255)
+  password String? @db.VarChar(255)
+  blogs    blogs[]
+}

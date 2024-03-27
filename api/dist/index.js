@@ -19,11 +19,6 @@ app.use((0, cors_1.default)(corsOptions));
 app.use(body_parser_1.default.urlencoded({ extended: false }));
 app.use((0, cookie_parser_1.default)());
 const port = 3000;
-app.get("/test", (req, res) => {
-    console.log("The cookies are" + req.cookies);
-    console.log(req.body);
-    return res.status(200).json({ message: "Hello" });
-});
 app.use("/auth", auth_1.default);
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);

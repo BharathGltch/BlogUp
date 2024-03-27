@@ -20,11 +20,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 const port = 3000;
 
-app.get("/test", (req, res) => {
-  console.log("The cookies are" + req.cookies);
-  console.log(req.body);
-  return res.status(200).json({ message: "Hello" });
-});
 app.use("/auth", authRoutes);
 
 app.listen(port, () => {

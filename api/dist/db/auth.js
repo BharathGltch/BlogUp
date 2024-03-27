@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.authenticateUserPrisma = exports.authenticateUser = void 0;
 const initConn_1 = require("./initConn");
+const client_1 = require("@prisma/client");
+const prisma = new client_1.PrismaClient();
 function authenticateUser(username, password) {
     return __awaiter(this, void 0, void 0, function* () {
         let query = "Select userid,username from users Where username=$1 AND password=$2;";
@@ -21,4 +24,22 @@ function authenticateUser(username, password) {
         return null;
     });
 }
-exports.default = authenticateUser;
+exports.authenticateUser = authenticateUser;
+function authenticateUserPrisma(username, password) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = yield prisma.users.findFirst({
+            where: {
+                username: username,
+                password: password,
+            },
+        });
+        if (user == null) {
+            return null;
+        }
+        return {
+            userid: user.userid,
+            username: username,
+        };
+    });
+}
+exports.authenticateUserPrisma = authenticateUserPrisma;

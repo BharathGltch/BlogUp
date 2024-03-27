@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const express_1 = __importDefault(require("express"));
 const blogcommon_1 = require("@bharath_ch/blogcommon");
-const auth_1 = __importDefault(require("../db/auth"));
+const auth_1 = require("../db/auth");
 const body_parser_1 = __importDefault(require("body-parser"));
 const initConn_1 = require("../db/initConn");
 const cors_1 = __importDefault(require("cors"));
@@ -61,13 +61,13 @@ router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
     else {
         const { username, password } = resultParse.data;
-        let user = yield (0, auth_1.default)(username, password);
+        let user = yield (0, auth_1.authenticateUserPrisma)(username, password);
         if (user == null) {
             return res
                 .status(404)
                 .json({ status: false, message: "Username or password incorrect" });
         }
-        let token = jsonwebtoken_1.default.sign({ username: user.username }, Secret, {
+        let token = jsonwebtoken_1.default.sign({ userid: user.userid, username: user.username }, Secret, {
             expiresIn: "1h",
         });
         res.cookie("token", token, { httpOnly: true });

@@ -1,6 +1,9 @@
 import { pgp, db } from "./initConn";
+import { Prisma, PrismaClient } from "@prisma/client";
 
-async function authenticateUser(
+const prisma = new PrismaClient();
+
+export async function authenticateUser(
   username: string,
   password: string
 ): Promise<{ userid: string; username: string } | null> {
@@ -14,4 +17,21 @@ async function authenticateUser(
   return null;
 }
 
-export default authenticateUser;
+export async function authenticateUserPrisma(
+  username: string,
+  password: string
+): Promise<{ userid: number; username: string } | null> {
+  const user = await prisma.users.findFirst({
+    where: {
+      username: username,
+      password: password,
+    },
+  });
+  if (user == null) {
+    return null;
+  }
+  return {
+    userid: user.userid,
+    username: username,
+  };
+}
